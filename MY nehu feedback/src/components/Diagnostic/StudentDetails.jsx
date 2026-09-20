@@ -1,20 +1,11 @@
-export function StudentDetails({ name, setName, isAnon, setIsAnon, dept, setDept, yearOfStudy, setYearOfStudy, usageFreq, setUsageFreq }) {
+export function StudentDetails({ name, setName, dept, setDept, yearOfStudy, setYearOfStudy, usageFreq, setUsageFreq }) {
   return (
     <>
       <div style={{ marginBottom: '1.4rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+        <div style={{ marginBottom: '0.4rem' }}>
           <label className="font-mono" style={{ fontSize: '0.82rem', color: 'var(--cyan-primary)' }}>01 // STUDENT NAME</label>
-          <button type="button" onClick={() => setIsAnon(!isAnon)} className="font-mono" style={{ fontSize: '0.72rem', background: isAnon ? 'rgba(0,255,157,0.15)' : 'transparent', color: isAnon ? 'var(--emerald-neon)' : 'var(--text-dim)', border: 'none', cursor: 'pointer', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
-            {isAnon ? '✓ ANONYMOUS' : 'Submit Anonymously'}
-          </button>
         </div>
-        {!isAnon ? (
-          <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="Enter your full name..." className="cyber-input" />
-        ) : (
-          <div className="font-mono" style={{ padding: '0.7rem 1rem', background: 'rgba(0, 255, 157, 0.08)', border: '1px solid var(--emerald-neon)', borderRadius: '6px', color: 'var(--emerald-neon)', fontSize: '0.85rem' }}>
-            🔒 Submitting as Anonymous Student.
-          </div>
-        )}
+        <input type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="Enter your full name..." className="cyber-input" />
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.4rem' }}>
         <div>
