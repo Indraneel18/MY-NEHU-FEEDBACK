@@ -1,42 +1,21 @@
 import { supabase } from './supabase';
 
 export async function ensureUserSession() {
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-  if (sessionError) {
-    console.warn('Session lookup failed:', sessionError.message);
-  }
-
-  if (session?.user) {
-    return session.user;
-  }
-
-  try {
-    const { data, error } = await supabase.auth.signInAnonymously();
-    if (error) {
-      console.warn('Anonymous sign-in unavailable:', error.message);
-      return null;
-    }
-    return data?.user ?? null;
-  } catch (error) {
-    console.warn('Anonymous sign-in failed:', error.message || error);
-    return null;
-  }
+ 
 }
 
-export async function getUserFeedback(userId) {
-  let query = supabase.from('feedback_responses').select('*');
+export async function getUserFeedback() {
+  const { data, error } = await supabase
+    .from('feedback_responses')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-  if (userId) {
-    query = query.eq('user_id', userId);
+  if (error) {
+    throw error;
   }
 
-  const { data, error } = await query.order('created_at', { ascending: false });
-
-  if (error) throw error;
   return data ?? [];
 }
-
 export async function getUserFeatures(userId) {
   let query = supabase.from('feature_requests').select('*');
 
@@ -69,7 +48,10 @@ export async function insertFeedback(payload) {
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    throw error;
+  }
+
   return data;
 }
 
@@ -148,7 +130,7 @@ export async function deleteAllFeatures(userId) {
   if (error) throw error;
 }
 
-export async function toggleFeatureUpvote(featureId, userId) {
+export async function toggleFeatureUpvote(featureId, userId, alreadyUpvoted = false) {
   const { data: feature, error: featureError } = await supabase
     .from('feature_requests')
     .select('upvotes')
@@ -194,7 +176,10 @@ export async function toggleFeatureUpvote(featureId, userId) {
     if (insertVoteError) throw insertVoteError;
   }
 
-  const nextVotes = Number(feature.upvotes || 0) + 1;
+  const nextVotes = Math.max(
+    0,
+    Number(feature.upvotes || 0) + (alreadyUpvoted ? -1 : 1)
+  );
   const { data: updatedFeature, error: updateError } = await supabase
     .from('feature_requests')
     .update({ upvotes: nextVotes })
@@ -203,6 +188,6 @@ export async function toggleFeatureUpvote(featureId, userId) {
     .single();
 
   if (updateError) throw updateError;
-  return { ...updatedFeature, user_upvoted: true };
+  return { ...updatedFeature, user_upvoted: !alreadyUpvoted };
 }
 
